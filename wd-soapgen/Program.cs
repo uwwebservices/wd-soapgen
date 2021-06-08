@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace wd_soapgen
+namespace WD.SoapGen
 {
     class Program
     {
