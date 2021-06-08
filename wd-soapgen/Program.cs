@@ -71,13 +71,22 @@ namespace WD.SoapGen
                     return;
                 }
 
-                var xscgenOutput = DotnetTool.Xscgen(new XscgenArguments
+                try
                 {
-                    Directory = dir,
-                    Project = proj,
-                    Namespace = @namespace,
-                    Xsd = xsd
-                });
+                    var xscgenOutput = DotnetTool.Xscgen(new XscgenArguments
+                    {
+                        Directory = dir,
+                        Project = proj,
+                        Namespace = @namespace,
+                        Xsd = xsd
+                    });
+                }
+                catch (ToolingException te)
+                {
+                    Console.WriteLine(te.Message);
+                    return;
+                }
+                
 
                 Console.WriteLine(proj);
             });
