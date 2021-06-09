@@ -26,9 +26,9 @@ namespace WD.SoapGen.Tooling
         /// <param name="namespace"></param>
         /// <param name="xsd"></param>
         /// <returns></returns>
-        public static string Xscgen(XscgenArguments args)
+        public static void Xscgen(SoapGenArguments args)
         {
-            Console.WriteLine($"Generating types with xscgen from {args.Xsd}...");
+            Console.WriteLine($"Generating types with xscgen from {args.Xsd} ...");
             var document = Path.GetFileName(args.Xsd);
             var proc = new Process
             {
@@ -51,20 +51,62 @@ namespace WD.SoapGen.Tooling
                 },
             };
 
+            Run("xscgen", proc, TimeSpan.FromSeconds(60));
+        }
+
+        /// <summary>
+        /// Call dotnet-svcutil like:
+        /// dotnet-svcutil Resource_Management.wsdl --outputDir Service --serializer XmlSerializer --projectFile UWD.Lib/UWD.Lib.csproj --namespace "*,UWD.Lib" 
+        /// </summary>
+        /// <param name="args"></param>
+        public static void Svcutil(SoapGenArguments args)
+        {
+            Console.WriteLine($"Generating service client with dotnet-svcutil from {args.Wsdl} ...");
+            var proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = ResolveBin("dotnet-svcutil"),
+                    ArgumentList =
+                    {
+                        args.Wsdl,
+                        "--outputDir",
+                        Path.Combine(args.Directory, "Service"),
+                        "--serializer",
+                        "XmlSerializer",
+                        "--projectFile",
+                        Path.Combine(args.Directory, $"{args.Project}.csproj"),
+                        "--namespace",
+                        $"\"*,{args.Namespace}\"",
+                        "--noLogo"
+                    },
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    WorkingDirectory = args.Directory
+                }
+            };
+
+            Run("dotnet-svcutil", proc, TimeSpan.FromSeconds(60));
+        }
+
+        static void Run(string toolName, Process proc, TimeSpan timeout)
+        {
             proc.Start();
 
-            if (!proc.WaitForExit((int)TimeSpan.FromSeconds(60).TotalMilliseconds))
+            if (!proc.WaitForExit((int)timeout.TotalMilliseconds))
             {
                 proc.Kill();
-                throw new ToolingException("xscgen timed out after 60 seconds");
+                Console.WriteLine(proc.StandardOutput.ReadToEnd());
+                throw new ToolingException($"{toolName} timed out after {(int)timeout.TotalSeconds} seconds");
             }
+
+            Console.WriteLine(proc.StandardOutput.ReadToEnd());
 
             if (proc.ExitCode != 0)
             {
-                throw new ToolingException("xscgen", proc.ExitCode);
+                throw new ToolingException(toolName, proc.ExitCode);
             }
-
-            return args.GetGeneratedFile();
         }
 
         static string ResolveBin(string toolName)
@@ -78,19 +120,6 @@ namespace WD.SoapGen.Tooling
             var home = Environment.SpecialFolder.UserProfile.GetFolderPath();
 
             return Path.Combine(home, ".dotnet", "tools", toolName);
-        }
-    }
-
-    public record XscgenArguments
-    {
-        public string Directory { get; init; } = "";
-        public string Project { get; init; } = "";
-        public string Namespace { get; init; } = "";
-        public string Xsd { get; init; } = "";
-
-        public string GetGeneratedFile()
-        {
-            return Path.Combine(Directory, $"{Project}.cs");
         }
     }
 }
