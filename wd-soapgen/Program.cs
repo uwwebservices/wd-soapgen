@@ -23,7 +23,7 @@ Use links from:
   https://community.workday.com/sites/default/files/file-hosting/productionapi/versions/index.html"),
                 new Option<string>("--dir", () => Directory.GetCurrentDirectory(), "Target project directory. Must contain a csproj file."),
                 new Option<string>("--namespace", "Namespace to generate code for. Default project name."),
-                new Option<bool>("--clean", "Clean previously generated files.")
+                new Option<bool>("--clean", () => false, "Clean previously generated files.")
             };
 
             root.Handler = CommandHandler.Create<string, string, string, bool>((wsdl, dir, @namespace, clean) =>

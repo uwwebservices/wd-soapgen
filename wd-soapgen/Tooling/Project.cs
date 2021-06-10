@@ -35,7 +35,7 @@ namespace WD.SoapGen.Tooling
             }
 
             var serviceDirectory = Path.Combine(directory, "Service");
-            if (!Directory.Exists(serviceDirectory))
+            if (Directory.Exists(serviceDirectory))
             {
                 Console.WriteLine($"Deleting {serviceDirectory} ...");
                 Directory.Delete(serviceDirectory, recursive: true);
