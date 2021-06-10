@@ -25,16 +25,16 @@ namespace WD.SoapGen.Tooling
             return true;
         }
 
-        public static void CleanUp(string directory, string project)
+        public static void CleanUp(SoapGenArguments args)
         {
-            var xscgenOutput = Path.Combine(directory, $"{project}.cs");
+            var xscgenOutput = args.XscgenFile();
             if (File.Exists(xscgenOutput))
             {
                 Console.WriteLine($"Deleting {xscgenOutput} ...");
                 File.Delete(xscgenOutput);
             }
 
-            var serviceDirectory = Path.Combine(directory, "Service");
+            var serviceDirectory = args.ServiceDirectory();
             if (Directory.Exists(serviceDirectory))
             {
                 Console.WriteLine($"Deleting {serviceDirectory} ...");
@@ -42,22 +42,22 @@ namespace WD.SoapGen.Tooling
             }
         }
 
-        public static bool IsReady(string directory, string project, out IEnumerable<string> files)
+        public static bool IsReady(SoapGenArguments args, out IEnumerable<string> files)
         {
             var fis = new List<string>();
             var ret = true;
 
-            var xscgenOutput = Path.Combine(directory, $"{project}.cs");
+            var xscgenOutput = args.XscgenFile();
             if (File.Exists(xscgenOutput))
             {
                 fis.Add(xscgenOutput);
                 ret = false;
             }
 
-            var serviceDirectory = Path.Combine(directory, "Service");
+            var serviceDirectory = args.ServiceDirectory();
             if (Directory.Exists(serviceDirectory))
             {
-                var referenceFile = Path.Combine(serviceDirectory, "Reference.cs");
+                var referenceFile = args.SvcutilFile();
                 if (File.Exists(referenceFile))
                 {
                     fis.Add(referenceFile);

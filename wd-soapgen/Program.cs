@@ -36,10 +36,10 @@ Use links from:
                 if (clean)
                 {
                     Console.WriteLine($"Cleaning up files in {sa.Directory} ...");
-                    Project.CleanUp(sa.Directory, sa.Project);
+                    Project.CleanUp(sa);
                 }
 
-                if (!Project.IsReady(sa.Directory, sa.Project, out var conflicts))
+                if (!Project.IsReady(sa, out var conflicts))
                 {
                     Console.Error.WriteLine($"Project directory {sa.Directory} already has generated content, try again with --clean if you're regenerating.");
                     foreach (var conflict in conflicts)
@@ -157,12 +157,17 @@ Use links from:
 
         public string XscgenFile()
         {
-            return Path.Combine(Directory, $"{Project}.cs");
+            return Path.Combine(Directory, $"{Namespace}.cs");
         }
 
         public string SvcutilFile()
         {
             return Path.Combine(Directory, "Service", "Reference.cs");
+        }
+
+        public string ServiceDirectory()
+        {
+            return Path.Combine(Directory, "Service");
         }
     }
 }
