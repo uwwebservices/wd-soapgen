@@ -1,5 +1,5 @@
 # wd-soapgen
-Meld [xscgen](https://www.nuget.org/packages/dotnet-xscgen/) and [dotnet-svcutil](https://www.nuget.org/packages/dotnet-svcutil) tools to create corrected Workday SOAP client libraries
+Meld [xscgen](https://www.nuget.org/packages/dotnet-xscgen/) and [dotnet-svcutil](https://www.nuget.org/packages/dotnet-svcutil) tools to create corrected Workday SOAP client libraries.
 
 ## Install
 ```
@@ -9,9 +9,21 @@ cd wd-soapgen
 ```
 
 ## Usage
+### First-time
+```
+cd WD.V35.ResourceManagement
+wd-soapgen https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v36.1/Resource_Management.wsdl
+```
+### Regenerate (and update dependencies)
 ```
 cd WD.V35.ResourceManagement
 wd-soapgen --clean https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v36.1/Resource_Management.wsdl
+```
+
+### Regenerate (and do not update dependencies)
+```
+cd WD.V35.ResourceManagement
+wd-soapgen --clean --no-install https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v36.1/Resource_Management.wsdl
 ```
 
 ## Why?

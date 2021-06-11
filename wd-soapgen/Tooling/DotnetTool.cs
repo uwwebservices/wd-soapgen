@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using WD.SoapGen.Ext;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace WD.SoapGen.Tooling
 {
@@ -88,6 +89,46 @@ namespace WD.SoapGen.Tooling
             };
 
             Run("dotnet-svcutil", proc, TimeSpan.FromSeconds(60));
+        }
+
+        public static void AddPackage(SoapGenArguments args, string package, string version = "")
+        {
+            var projectfile = args.ProjectFile();
+            Console.WriteLine($"Adding ServiceModel dependencies to {projectfile} ...");
+
+            var arglist = new Collection<string>
+            {
+                "add",
+                projectfile,
+                "package",
+                package
+            };
+
+            if (version.Some())
+            {
+                arglist.Add("--version");
+                arglist.Add(version);
+            }
+
+            var start = new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                WorkingDirectory = args.Directory
+            };
+            foreach (var ar in arglist)
+            {
+                start.ArgumentList.Add(ar);
+            }
+
+            var proc = new Process
+            {
+                StartInfo = start
+            };
+
+            Run("dotnet", proc, TimeSpan.FromSeconds(30));
         }
 
         static void Run(string toolName, Process proc, TimeSpan timeout)

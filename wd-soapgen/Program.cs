@@ -21,12 +21,13 @@ namespace WD.SoapGen
                 new Argument<string>("wsdl", @"Link to the wsdl.
 Use links from:
   https://community.workday.com/sites/default/files/file-hosting/productionapi/versions/index.html"),
-                new Option<string>("--dir", () => Directory.GetCurrentDirectory(), "Target project directory. Must contain a csproj file."),
-                new Option<string>("--namespace", "Namespace to generate code for. Default project name."),
-                new Option<bool>("--clean", () => false, "Clean previously generated files.")
+                new Option<string>(new string[] { "--dir", "-d" }, () => Directory.GetCurrentDirectory(), "Target project directory. Must contain a csproj file."),
+                new Option<string>(new string[] { "--namespace", "-n" }, "Namespace to generate code for. Default project name."),
+                new Option<bool>(new string[] { "--clean", "-c" }, () => false, "Clean previously generated files."),
+                new Option<bool>(new string[] { "--no-install" }, () => false, "Do not install ServiceModel dependencies.")
             };
 
-            root.Handler = CommandHandler.Create<string, string, string, bool>((wsdl, dir, @namespace, clean) =>
+            root.Handler = CommandHandler.Create<string, string, string, bool, bool>((wsdl, dir, @namespace, clean, noInstall) =>
             {
                 if (!TryDigestArgs(wsdl, dir, @namespace, out var sa))
                 {
@@ -65,6 +66,11 @@ Use links from:
 
                     File.WriteAllText(sa.SvcutilFile(), service.ToString());
 
+                    if (!noInstall)
+                    {
+                        InstallDependencies(sa);
+                    }
+
                     Console.WriteLine("Done.");
 
                     return 0;
@@ -85,6 +91,22 @@ Use links from:
             });
 
             return root.Invoke(args);
+        }
+
+        static void InstallDependencies(SoapGenArguments sa)
+        {
+            Console.WriteLine("Installing ServiceModel dependencies...");
+            Console.WriteLine("  System.ServiceModel.Duplex...");
+            DotnetTool.AddPackage(sa, "System.ServiceModel.Duplex");
+
+            Console.WriteLine("  System.ServiceModel.Http...");
+            DotnetTool.AddPackage(sa, "System.ServiceModel.Http");
+
+            Console.WriteLine("  System.ServiceModel.NetTcp...");
+            DotnetTool.AddPackage(sa, "System.ServiceModel.NetTcp");
+
+            Console.WriteLine("  System.ServiceModel.Security...");
+            DotnetTool.AddPackage(sa, "System.ServiceModel.Security");
         }
 
         static bool TryDigestArgs(string wsdl, string dir, string @namespace, [NotNullWhen(true)] out SoapGenArguments? args)
@@ -168,6 +190,11 @@ Use links from:
         public string ServiceDirectory()
         {
             return Path.Combine(Directory, "Service");
+        }
+
+        public string ProjectFile()
+        {
+            return Path.Combine(Directory, $"{Project}.csproj");
         }
     }
 }
