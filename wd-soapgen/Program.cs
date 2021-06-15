@@ -24,7 +24,7 @@ Use links from:
                 new Option<string>(new string[] { "--dir", "-d" }, () => Directory.GetCurrentDirectory(), "Target project directory. Must contain a csproj file."),
                 new Option<string>(new string[] { "--namespace", "-n" }, "Namespace to generate code for. Default project name."),
                 new Option<bool>(new string[] { "--clean", "-c" }, () => false, "Clean previously generated files."),
-                new Option<bool>(new string[] { "--no-install" }, () => false, "Do not install ServiceModel dependencies.")
+                new Option<bool>(new string[] { "--no-install", "-x" }, () => false, "Do not install ServiceModel dependencies.")
             };
 
             root.Handler = CommandHandler.Create<string, string, string, bool, bool>((wsdl, dir, @namespace, clean, noInstall) =>
