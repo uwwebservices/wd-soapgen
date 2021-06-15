@@ -19,7 +19,7 @@ if (!(Test-Path $xscgen)) {
 }
 
 Write-Host "Packing wd-soapgen..."
-dotnet pack
+dotnet pack -c Release
 
 if (Test-Path $soapgen) {
     Write-Host "wd-soapgen already installed, updating..."
