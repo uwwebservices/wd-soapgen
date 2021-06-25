@@ -61,7 +61,7 @@ Use links from:
 
                     var disagreements = new TypeDisagreementParser().Parse(sa.XscgenFile());
 
-                    var parser = new ClientParser(new DisagreementRewriter(disagreements));
+                    var parser = new ClientParser(new ServiceRewriter(sa, disagreements));
                     var service = parser.Extract(sa.SvcutilFile());
 
                     File.WriteAllText(sa.SvcutilFile(), service.ToString());
@@ -137,7 +137,7 @@ Use links from:
 
             if (!wsdl.EndsWith(".wsdl"))
             {
-                Console.Error.WriteLine($"--wsdl must end in .wsdl");
+                Console.Error.WriteLine($"wsdl must end in .wsdl");
                 return false;
             }
 
@@ -162,7 +162,8 @@ Use links from:
                 Xsd = xsd,
                 Directory = dir,
                 Project = proj,
-                Namespace = @namespace
+                Namespace = @namespace,
+                Service = Path.GetFileNameWithoutExtension(wsdl)
             };
 
             return true;
@@ -174,8 +175,9 @@ Use links from:
         public string Wsdl { get; init; } = "";
         public string Xsd { get; set; } = "";
         public string Directory { get; init; } = "";
-        public string Project { get; set; } = "";
-        public string Namespace { get; set; } = "";
+        public string Project { get; init; } = "";
+        public string Namespace { get; init; } = "";
+        public string Service { get; init; } = "";
 
         public string XscgenFile()
         {
