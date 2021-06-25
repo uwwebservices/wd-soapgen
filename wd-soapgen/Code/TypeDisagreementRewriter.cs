@@ -85,8 +85,7 @@ namespace WD.SoapGen.Code
                 return base.VisitAttributeArgumentList(node);
             }
 
-            var attr = node.Parent as AttributeSyntax;
-            if (attr is null)
+            if (node.Parent is not AttributeSyntax attr)
             {
                 return base.VisitAttributeArgumentList(node);
             }
