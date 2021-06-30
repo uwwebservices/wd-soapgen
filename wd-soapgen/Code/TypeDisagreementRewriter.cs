@@ -95,7 +95,7 @@ namespace WD.SoapGen.Code
                 return base.VisitAttributeArgumentList(node);
             }
 
-            var first = node.Arguments.FirstOrDefault(a => a.ToFullString().Contains("Validation_ErrorType[]"));
+            var first = node.Arguments.FirstOrDefault(a => a.Expression is TypeOfExpressionSyntax && a.ToFullString().Contains("Validation_ErrorType[]"));
             if (first is null)
             {
                 return base.VisitAttributeArgumentList(node);
