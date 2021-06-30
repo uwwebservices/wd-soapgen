@@ -6,6 +6,7 @@ using System.IO;
 using WD.SoapGen.Ext;
 using System.Diagnostics.CodeAnalysis;
 using WD.SoapGen.Code;
+using System.Reflection;
 
 namespace WD.SoapGen
 {
@@ -77,7 +78,7 @@ Use links from:
                 }
                 catch (ToolingException te)
                 {
-                    Console.Error.WriteLine("Tooling error encountered!");
+                    Console.Error.WriteLine($"{te.Tool} encountered an error!");
                     Console.Error.WriteLine(te.Message);
                     return 1;
                 }

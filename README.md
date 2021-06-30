@@ -8,22 +8,46 @@ cd wd-soapgen
 .\install.ps1
 ```
 
+## Project Assumptions
+This tool assumes that you isolate generated service code to dedicated projects. For example:
+```
+- WorkdayProject
+  - WorkdayProject.sln
+  - WD.V35.ResourceManagement
+    - WD.V35.ResourceManagement.csproj (classlib)
+  - WorkdayWorker
+    - WorkdayWorker.csproj (console)
+```
+After running `wd-soapgen` in `WD.V35.ResourceManagement` the file system layout would look like:
+```
+- WorkdayProject
+  - WorkdayProject.sln
+  - WD.V35.ResourceManagement
+    - WD.V35.ResourceManagement.csproj (classlib)
+    - WD.V35.ResourceManagement.cs
+    - Service
+      - Reference.cs
+      - dotnet-svcutil.params.json
+  - WorkdayWorker
+    - WorkdayWorker.csproj (console)
+```
+
 ## Usage
 ### First-time
 ```
 cd WD.V35.ResourceManagement
-wd-soapgen https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v36.1/Resource_Management.wsdl
+wd-soapgen https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v35.0/Resource_Management.wsdl
 ```
 ### Regenerate (and update dependencies)
 ```
 cd WD.V35.ResourceManagement
-wd-soapgen --clean https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v36.1/Resource_Management.wsdl
+wd-soapgen --clean https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v35.0/Resource_Management.wsdl
 ```
 
 ### Regenerate (and do not update dependencies)
 ```
 cd WD.V35.ResourceManagement
-wd-soapgen --clean --no-install https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v36.1/Resource_Management.wsdl
+wd-soapgen --clean --no-install https://community.workday.com/sites/default/files/file-hosting/productionapi/Resource_Management/v35.0/Resource_Management.wsdl
 ```
 
 ## Why?
