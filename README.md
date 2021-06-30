@@ -1,4 +1,4 @@
-# wd-soapgen [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+# wd-soapgen [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 Meld [xscgen](https://www.nuget.org/packages/dotnet-xscgen/) and [dotnet-svcutil](https://www.nuget.org/packages/dotnet-svcutil) tools to create corrected Workday SOAP client libraries.
 
 ## Install
