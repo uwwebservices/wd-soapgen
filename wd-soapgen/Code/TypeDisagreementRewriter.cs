@@ -102,7 +102,7 @@ namespace WD.SoapGen.Code
                     return false;
                 }
 
-                return toes.Type.ToFullString().EndsWith("Validation_ErrorType[]");
+                return toes.Type.ToFullString().Equals($"{args.Namespace}.Validation_ErrorType[]");
             });
 
             if (first is null)
