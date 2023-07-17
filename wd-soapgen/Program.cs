@@ -35,42 +35,34 @@ Use links from:
                     return 1;
                 }
 
-                if (clean)
-                {
-                    Console.WriteLine($"Cleaning up files in {sa.Directory} ...");
-                    Project.CleanUp(sa);
-                }
+                //if (clean)
+                //{
+                //    Console.WriteLine($"Cleaning up files in {sa.Directory} ...");
+                //    Project.CleanUp(sa);
+                //}
 
-                if (!Project.IsReady(sa, out var conflicts))
-                {
-                    Console.Error.WriteLine($"Project directory {sa.Directory} already has generated content, try again with --clean if you're regenerating.");
-                    foreach (var conflict in conflicts)
-                    {
-                        Console.Error.WriteLine($"  {Path.GetRelativePath(sa.Directory, conflict)}");
-                    }
-                    return 1;
-                }
+                //if (!Project.IsReady(sa, out var conflicts))
+                //{
+                //    Console.Error.WriteLine($"Project directory {sa.Directory} already has generated content, try again with --clean if you're regenerating.");
+                //    foreach (var conflict in conflicts)
+                //    {
+                //        Console.Error.WriteLine($"  {Path.GetRelativePath(sa.Directory, conflict)}");
+                //    }
+                //    return 1;
+                //}
 
                 try
                 {
-                    DotnetTool.Xscgen(sa);
-                    DotnetTool.Svcutil(sa);
+                    //Stage.Generate(sa);
 
-                    Console.WriteLine("Merging xscgen and dotnet-svcutil types:");
-                    Console.WriteLine($"  xscgen: {sa.XscgenFile()}");
-                    Console.WriteLine($"  dotnet-svcutil: {sa.SvcutilFile()}");
+                    //Stage.Correct(sa);
 
-                    var disagreements = new TypeDisagreementParser().Parse(sa.XscgenFile());
+                    //if (!noInstall)
+                    //{
+                    //    Stage.InstallDependencies(sa);
+                    //}
 
-                    var parser = new ClientParser(new ServiceRewriter(sa, disagreements));
-                    var service = parser.Extract(sa.SvcutilFile());
-
-                    File.WriteAllText(sa.SvcutilFile(), service.ToString());
-
-                    if (!noInstall)
-                    {
-                        InstallDependencies(sa);
-                    }
+                    Stage.Coalesce(sa);
 
                     Console.WriteLine("Done.");
 
@@ -92,22 +84,6 @@ Use links from:
             });
 
             return root.Invoke(args);
-        }
-
-        static void InstallDependencies(SoapGenArguments sa)
-        {
-            Console.WriteLine("Installing ServiceModel dependencies...");
-            Console.WriteLine("  System.ServiceModel.Duplex...");
-            DotnetTool.AddPackage(sa, "System.ServiceModel.Duplex");
-
-            Console.WriteLine("  System.ServiceModel.Http...");
-            DotnetTool.AddPackage(sa, "System.ServiceModel.Http");
-
-            Console.WriteLine("  System.ServiceModel.NetTcp...");
-            DotnetTool.AddPackage(sa, "System.ServiceModel.NetTcp");
-
-            Console.WriteLine("  System.ServiceModel.Security...");
-            DotnetTool.AddPackage(sa, "System.ServiceModel.Security");
         }
 
         static bool TryDigestArgs(string wsdl, string dir, string @namespace, [NotNullWhen(true)] out SoapGenArguments? args)
