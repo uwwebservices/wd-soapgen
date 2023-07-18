@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WD.SoapGen.Ext;
 
@@ -18,33 +19,52 @@ namespace WD.SoapGen.Code;
 
 public partial class SyntaxCoalescer
 {
-    readonly SoapGenArguments _args;
-
-    public SyntaxCoalescer(SoapGenArguments args)
+    public CoalescedFiles Coalesce(SoapGenArguments args, ToolingContext toolingContext)
     {
-        _args = args;
-    }
-
-    public CoalescedFiles Coalesce()
-    {
-        var svcutilTree = CSharpSyntaxTree.ParseText(File.ReadAllText(_args.SvcutilFile()));
+        var svcutilTree = CSharpSyntaxTree.ParseText(File.ReadAllText(args.SvcutilFile()));
         var svcutilRoot = svcutilTree.GetRoot();
-        var xscgenTree = CSharpSyntaxTree.ParseText(File.ReadAllText(_args.XscgenFile()));
+        var xscgenTree = CSharpSyntaxTree.ParseText(File.ReadAllText(args.XscgenFile()));
         var xscgenRoot = xscgenTree.GetRoot();
+        var svcParams = GetSvcParams(args);
 
-        var context = GetContext(svcutilRoot, xscgenRoot);
-        var typeCoalescer = new TypeCoalescer(context);
-        var saves = typeCoalescer.GetAnchoredTypes();
+        var context = GetContext(svcutilRoot, xscgenRoot, svcParams);
+        var extractor = new DependentExtractor(context.Types);
+        var classes = extractor.GetDependents(context.Port);
+        context.Render(toolingContext, classes);
 
         return new();
     }
 
-    Context GetContext(SyntaxNode svcutilRoot, SyntaxNode xscgenRoot)
+    static SvcutilParamsFile GetSvcParams(SoapGenArguments args)
     {
-        var ns = svcutilRoot
+        if (!File.Exists(args.SvcutilConfigFile()))
+        {
+            return new SvcutilParamsFile();
+        }
+        try
+        {
+            var content = File.ReadAllText(args.SvcutilConfigFile());
+            return JsonSerializer.Deserialize<SvcutilParamsFile>(content)!;
+        }
+        catch
+        {
+            return new SvcutilParamsFile();
+        }
+    }
+
+    class SvcutilParamsFile
+    {
+        public string version { get; set; }
+    }
+
+    Context GetContext(SyntaxNode svcutilRoot, SyntaxNode xscgenRoot, SvcutilParamsFile svcParams)
+    {
+        var ns = xscgenRoot
             .DescendantNodes()
             .OfType<NamespaceDeclarationSyntax>()
             .First();
+
+        var triv = ns.GetLeadingTrivia().ToString();
 
         var port = svcutilRoot
             .DescendantNodes()
@@ -86,13 +106,17 @@ public partial class SyntaxCoalescer
             }
         }
 
+        var d = b.ToImmutable();
+
         return new Context
         {
+            HeaderTrivia = triv,
+            SvcutilVersion = svcParams?.version,
             Namespace = ns,
             Port = port,
             PortChannel = portChannel,
             Client = client,
-            Types = b.ToImmutable()
+            Types = d,
         };
     }
 }
@@ -100,4 +124,10 @@ public partial class SyntaxCoalescer
 public class CoalescedFiles
 {
 
+}
+
+public class NewFile
+{
+    public string Filename { get; set; }
+    public string Content { get; set; }
 }

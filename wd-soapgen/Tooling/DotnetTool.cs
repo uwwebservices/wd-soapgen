@@ -27,7 +27,7 @@ namespace WD.SoapGen.Tooling
         /// <param name="namespace"></param>
         /// <param name="xsd"></param>
         /// <returns></returns>
-        public static void Xscgen(SoapGenArguments args)
+        public static string Xscgen(SoapGenArguments args)
         {
             Console.WriteLine($"Generating types with xscgen from {args.Xsd} ...");
             var document = Path.GetFileName(args.Xsd);
@@ -52,7 +52,7 @@ namespace WD.SoapGen.Tooling
                 },
             };
 
-            Run("xscgen", proc, TimeSpan.FromSeconds(60));
+            return Run("xscgen", proc, TimeSpan.FromSeconds(60));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace WD.SoapGen.Tooling
         /// dotnet-svcutil Resource_Management.wsdl --outputDir Service --serializer XmlSerializer --projectFile UWD.Lib/UWD.Lib.csproj --namespace "*,UWD.Lib" 
         /// </summary>
         /// <param name="args"></param>
-        public static void Svcutil(SoapGenArguments args)
+        public static string Svcutil(SoapGenArguments args)
         {
             Console.WriteLine($"Generating service client with dotnet-svcutil from {args.Wsdl} ...");
             var proc = new Process
@@ -88,7 +88,7 @@ namespace WD.SoapGen.Tooling
                 }
             };
 
-            Run("dotnet-svcutil", proc, TimeSpan.FromSeconds(60));
+            return Run("dotnet-svcutil", proc, TimeSpan.FromSeconds(60));
         }
 
         public static void AddPackage(SoapGenArguments args, string package, string version = "")
@@ -131,8 +131,9 @@ namespace WD.SoapGen.Tooling
             Run("dotnet", proc, TimeSpan.FromSeconds(30));
         }
 
-        static void Run(string toolName, Process proc, TimeSpan timeout)
+        static string Run(string toolName, Process proc, TimeSpan timeout)
         {
+            var args = $"{toolName} {string.Join(" ", proc.StartInfo.ArgumentList)}";
             proc.Start();
 
             if (!proc.WaitForExit((int)timeout.TotalMilliseconds))
@@ -148,6 +149,8 @@ namespace WD.SoapGen.Tooling
             {
                 throw new ToolingException(toolName, proc.ExitCode);
             }
+
+            return args;
         }
 
         static string ResolveBin(string toolName)

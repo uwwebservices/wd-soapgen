@@ -53,7 +53,12 @@ Use links from:
 
                 try
                 {
-                    //Stage.Generate(sa);
+                    var tooling = new ToolingContext
+                    {
+                        XscGenArgs = "xscgen -o D:\\tmp\\wd-gen\\WD.V35.FinancialManagement -n |Financial_Management.xsd=WD.V35.FinancialManagement --order https://community.workday.com/sites/default/files/file-hosting/productionapi/Financial_Management/v35.0/Financial_Management.xsd",
+                        SvcutilArgs = "dotnet-svcutil https://community.workday.com/sites/default/files/file-hosting/productionapi/Financial_Management/v35.0/Financial_Management.wsdl --outputDir D:\\tmp\\wd-gen\\WD.V35.FinancialManagement\\Service --serializer XmlSerializer --projectFile D:\\tmp\\wd-gen\\WD.V35.FinancialManagement\\WD.V35.FinancialManagement.csproj --namespace \"*,WD.V35.FinancialManagement\" --noLogo"
+                    };
+                    //var tooling = Stage.Generate(sa);
 
                     //Stage.Correct(sa);
 
@@ -62,7 +67,7 @@ Use links from:
                     //    Stage.InstallDependencies(sa);
                     //}
 
-                    Stage.Coalesce(sa);
+                    Stage.Coalesce(sa, tooling);
 
                     Console.WriteLine("Done.");
 
@@ -164,6 +169,11 @@ Use links from:
         public string SvcutilFile()
         {
             return Path.Combine(Directory, "Service", "Reference.cs");
+        }
+
+        public string SvcutilConfigFile()
+        {
+            return Path.Combine(Directory, "Service", "dotnet-svcutil.params.json");
         }
 
         public string ServiceDirectory()

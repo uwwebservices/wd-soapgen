@@ -11,10 +11,16 @@ namespace WD.SoapGen;
 
 internal class Stage
 {
-    public static void Generate(SoapGenArguments sa)
+    public static ToolingContext Generate(SoapGenArguments sa)
     {
-        DotnetTool.Xscgen(sa);
-        DotnetTool.Svcutil(sa);
+        var xscArgs = DotnetTool.Xscgen(sa);
+        var svcArgs = DotnetTool.Svcutil(sa);
+
+        return new ToolingContext
+        {
+            //XscGenArgs = xscArgs,
+            SvcutilArgs = svcArgs
+        };
     }
 
     public static void Correct(SoapGenArguments sa)
@@ -47,7 +53,7 @@ internal class Stage
         DotnetTool.AddPackage(sa, "System.ServiceModel.Security");
     }
 
-    public static void Coalesce(SoapGenArguments sa)
+    public static void Coalesce(SoapGenArguments sa, ToolingContext toolContext)
     {
         /* TODO(cspital) 
          * locate the ***Port interface
@@ -61,10 +67,16 @@ internal class Stage
          * delete early files
          */
 
-        var coalescer = new SyntaxCoalescer(sa);
+        var coalescer = new SyntaxCoalescer();
 
-        var files = coalescer.Coalesce();
+        var files = coalescer.Coalesce(sa, toolContext);
 
         _ = true;
     }
+}
+
+public class ToolingContext
+{
+    public string XscGenArgs { get; set; }
+    public string SvcutilArgs { get; set; }
 }
