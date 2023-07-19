@@ -80,7 +80,7 @@ namespace WD.SoapGen.Code
 
             var mdecl = node.Parent?.Parent?.Parent;
             if (mdecl is null ||
-                mdecl.Kind() != SyntaxKind.MethodDeclaration)
+                !mdecl.IsKind(SyntaxKind.MethodDeclaration))
             {
                 return base.VisitAttributeArgumentList(node);
             }
