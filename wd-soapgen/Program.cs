@@ -24,7 +24,7 @@ Use links from:
   https://community.workday.com/sites/default/files/file-hosting/productionapi/versions/index.html"),
                 new Option<string>(new string[] { "--dir", "-d" }, () => Directory.GetCurrentDirectory(), "Target project directory. Must contain a csproj file."),
                 new Option<string>(new string[] { "--namespace", "-n" }, "Namespace to generate code for. Default project name."),
-                new Option<bool>(new string[] { "--clean", "-c" }, () => false, "Clean previously generated files."),
+                new Option<bool>(new string[] { "--clean", "-c" }, () => true, "Clean previously generated files."),
                 new Option<bool>(new string[] { "--no-install", "-x" }, () => false, "Do not install ServiceModel dependencies.")
             };
 
@@ -35,39 +35,36 @@ Use links from:
                     return 1;
                 }
 
-                //if (clean)
-                //{
-                //    Console.WriteLine($"Cleaning up files in {sa.Directory} ...");
-                //    Project.CleanUp(sa);
-                //}
+                if (clean)
+                {
+                    Console.WriteLine($"Cleaning up files in {sa.Directory} ...");
+                    Project.CleanUp(sa);
+                }
 
-                //if (!Project.IsReady(sa, out var conflicts))
-                //{
-                //    Console.Error.WriteLine($"Project directory {sa.Directory} already has generated content, try again with --clean if you're regenerating.");
-                //    foreach (var conflict in conflicts)
-                //    {
-                //        Console.Error.WriteLine($"  {Path.GetRelativePath(sa.Directory, conflict)}");
-                //    }
-                //    return 1;
-                //}
+                if (!Project.IsReady(sa, out var conflicts))
+                {
+                    Console.Error.WriteLine($"Project directory {sa.Directory} already has generated content, try again with --clean if you're regenerating.");
+                    foreach (var conflict in conflicts)
+                    {
+                        Console.Error.WriteLine($"  {Path.GetRelativePath(sa.Directory, conflict)}");
+                    }
+                    return 1;
+                }
 
                 try
                 {
-                    var tooling = new ToolingContext
+                    var tooling = Stage.Generate(sa);
+
+                    Stage.Correct(sa);
+
+                    if (!noInstall)
                     {
-                        XscGenArgs = "xscgen -o D:\\tmp\\wd-gen\\WD.V35.FinancialManagement -n |Financial_Management.xsd=WD.V35.FinancialManagement --order https://community.workday.com/sites/default/files/file-hosting/productionapi/Financial_Management/v35.0/Financial_Management.xsd",
-                        SvcutilArgs = "dotnet-svcutil https://community.workday.com/sites/default/files/file-hosting/productionapi/Financial_Management/v35.0/Financial_Management.wsdl --outputDir D:\\tmp\\wd-gen\\WD.V35.FinancialManagement\\Service --serializer XmlSerializer --projectFile D:\\tmp\\wd-gen\\WD.V35.FinancialManagement\\WD.V35.FinancialManagement.csproj --namespace \"*,WD.V35.FinancialManagement\" --noLogo"
-                    };
-                    //var tooling = Stage.Generate(sa);
+                        Stage.InstallDependencies(sa);
+                    }
 
-                    //Stage.Correct(sa);
+                    var files = Stage.Coalesce(sa, tooling);
 
-                    //if (!noInstall)
-                    //{
-                    //    Stage.InstallDependencies(sa);
-                    //}
-
-                    Stage.Coalesce(sa, tooling);
+                    Stage.Overwrite(sa, files);
 
                     Console.WriteLine("Done.");
 
@@ -184,6 +181,12 @@ Use links from:
         public string ProjectFile()
         {
             return Path.Combine(Directory, $"{Project}.csproj");
+        }
+
+        public string Coalesced(string filename)
+        {
+            return Path.Combine(Directory, filename);
+
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics.CodeAnalysis;
 using WD.SoapGen.Ext;
+using WD.SoapGen.Code;
 
 namespace WD.SoapGen.Tooling
 {
@@ -40,6 +41,27 @@ namespace WD.SoapGen.Tooling
                 Console.WriteLine($"Deleting {serviceDirectory} ...");
                 Directory.Delete(serviceDirectory, recursive: true);
             }
+
+            var interfaceFile = args.Coalesced(ContextRenderer.InterfaceFile);
+            if (File.Exists(interfaceFile))
+            {
+                Console.WriteLine($"Deleting {interfaceFile} ...");
+                File.Delete(interfaceFile);
+            }
+
+            var clientFile = args.Coalesced(ContextRenderer.ClientFile);
+            if (File.Exists(clientFile))
+            {
+                Console.WriteLine($"Deleting {clientFile} ...");
+                File.Delete(clientFile);
+            }
+
+            var typesFile = args.Coalesced(ContextRenderer.TypesFile);
+            if (File.Exists(typesFile))
+            {
+                Console.WriteLine($"Deleting {typesFile} ...");
+                File.Delete(typesFile);
+            }
         }
 
         public static bool IsReady(SoapGenArguments args, out IEnumerable<string> files)
@@ -63,6 +85,27 @@ namespace WD.SoapGen.Tooling
                     fis.Add(referenceFile);
                     ret = false;
                 }
+            }
+
+            var interfaceFile = args.Coalesced(ContextRenderer.InterfaceFile);
+            if (File.Exists(interfaceFile))
+            {
+                fis.Add(interfaceFile);
+                ret = false;
+            }
+
+            var clientFile = args.Coalesced(ContextRenderer.ClientFile);
+            if (File.Exists(clientFile))
+            {
+                fis.Add(clientFile);
+                ret = false;
+            }
+
+            var typesFile = args.Coalesced(ContextRenderer.TypesFile);
+            if (File.Exists(typesFile))
+            {
+                fis.Add(typesFile);
+                ret = false;
             }
 
             files = fis;

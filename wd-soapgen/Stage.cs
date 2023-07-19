@@ -53,25 +53,25 @@ internal class Stage
         DotnetTool.AddPackage(sa, "System.ServiceModel.Security");
     }
 
-    public static void Coalesce(SoapGenArguments sa, ToolingContext toolContext)
+    public static CoalescedFiles Coalesce(SoapGenArguments sa, ToolingContext toolContext)
     {
-        /* TODO(cspital) 
-         * locate the ***Port interface
-         * identity all input/output types
-         * foreach type
-         *   depth first search public child properties (or inner type in the case of generic wrappers) and add all encountered types from the same namespace to hashset
-         *   only add child properties that are defined in the type pool
-         * create new file with the interface definitions
-         * create new file with only the types from search result
-         * create new file with only the concrete implementation
-         * delete early files
-         */
-
         var coalescer = new SyntaxCoalescer();
 
-        var files = coalescer.Coalesce(sa, toolContext);
+        return coalescer.Coalesce(sa, toolContext);
+    }
 
-        _ = true;
+    public static void Overwrite(SoapGenArguments sa, CoalescedFiles files)
+    {
+        Write(sa, files.Interfaces);
+        Write(sa, files.Client);
+        Write(sa, files.Types);
+        File.Delete(sa.SvcutilFile());
+        File.Delete(sa.XscgenFile());
+    }
+
+    static void Write(SoapGenArguments sa, NewFile file)
+    {
+        File.WriteAllText(sa.Coalesced(file.Filename), file.Content);
     }
 }
 

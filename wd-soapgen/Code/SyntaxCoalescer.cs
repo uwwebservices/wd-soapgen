@@ -17,7 +17,7 @@ using WD.SoapGen.Ext;
 
 namespace WD.SoapGen.Code;
 
-public partial class SyntaxCoalescer
+public class SyntaxCoalescer
 {
     public CoalescedFiles Coalesce(SoapGenArguments args, ToolingContext toolingContext)
     {
@@ -28,11 +28,13 @@ public partial class SyntaxCoalescer
         var svcParams = GetSvcParams(args);
 
         var context = GetContext(svcutilRoot, xscgenRoot, svcParams);
+
         var extractor = new DependentExtractor(context.Types);
         var classes = extractor.GetDependents(context.Port);
-        context.Render(toolingContext, classes);
 
-        return new();
+        var renderer = new ContextRenderer(context, toolingContext);
+
+        return renderer.Render(classes);
     }
 
     static SvcutilParamsFile GetSvcParams(SoapGenArguments args)
@@ -102,7 +104,7 @@ public partial class SyntaxCoalescer
         {
             if (!b.TryAdd(c.Identifier.Text, c))
             {
-                throw new InvalidOperationException($"Multiple classes detected with name: {c.Identifier.Text}");
+                throw new InvalidOperationException($"Type collision: {c.Identifier.Text}");
             }
         }
 
@@ -123,7 +125,9 @@ public partial class SyntaxCoalescer
 
 public class CoalescedFiles
 {
-
+    public NewFile Interfaces { get; set; }
+    public NewFile Client { get; set; }
+    public NewFile Types { get; set; }
 }
 
 public class NewFile
