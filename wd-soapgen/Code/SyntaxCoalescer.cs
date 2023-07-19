@@ -29,8 +29,8 @@ public class SyntaxCoalescer
 
         var context = GetContext(svcutilRoot, xscgenRoot, svcParams);
 
-        var extractor = new DependentExtractor(context.Types);
-        var classes = extractor.GetDependents(context.Port);
+        var extractor = new RequirementExtractor(context.Types);
+        var classes = extractor.GetRequirements(context.Port);
 
         var renderer = new ContextRenderer(context, toolingContext);
 

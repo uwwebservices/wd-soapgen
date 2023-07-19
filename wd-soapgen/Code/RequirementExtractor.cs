@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace WD.SoapGen.Code;
 
-class DependentExtractor
+class RequirementExtractor
 {
     readonly IDictionary<string, ClassDeclarationSyntax> _pluck;
     readonly HashSet<ClassDeclarationSyntax> _set = new(new ClassDeclarationEquality());
 
-    public DependentExtractor(IDictionary<string, ClassDeclarationSyntax> types)
+    public RequirementExtractor(IDictionary<string, ClassDeclarationSyntax> types)
     {
         _pluck = types;
     }
 
-    public IEnumerable<ClassDeclarationSyntax> GetDependents(InterfaceDeclarationSyntax port)
+    public IEnumerable<ClassDeclarationSyntax> GetRequirements(InterfaceDeclarationSyntax port)
     {
         var methods = port
             .DescendantNodes()
