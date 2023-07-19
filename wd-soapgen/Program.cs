@@ -165,17 +165,12 @@ Use links from:
 
         public string SvcutilFile()
         {
-            return Path.Combine(Directory, "Service", "Reference.cs");
+            return Path.Combine(Directory, "Svcutil.cs");
         }
 
         public string SvcutilConfigFile()
         {
-            return Path.Combine(Directory, "Service", "dotnet-svcutil.params.json");
-        }
-
-        public string ServiceDirectory()
-        {
-            return Path.Combine(Directory, "Service");
+            return Path.Combine(Directory, "dotnet-svcutil.params.json");
         }
 
         public string ProjectFile()

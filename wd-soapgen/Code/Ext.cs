@@ -26,6 +26,19 @@ public static class TypeExt
         };
     }
 
+    public static bool TryGetName(this TypeSyntax type, out SimpleNameSyntax? name)
+    {
+        name = type switch
+        {
+            GenericNameSyntax g => g,
+            IdentifierNameSyntax i => i,
+            QualifiedNameSyntax q => q.Right,
+            SimpleNameSyntax s => s,
+            _ => null
+        };
+        return name is not null;
+    }
+
     public static IEnumerable<TypeSyntax> GetInstanceMembers(this ClassDeclarationSyntax cls)
     {
         var data = cls.Members

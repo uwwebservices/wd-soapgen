@@ -18,7 +18,7 @@ internal class Stage
 
         return new ToolingContext
         {
-            //XscGenArgs = xscArgs,
+            XscGenArgs = xscArgs,
             SvcutilArgs = svcArgs
         };
     }
@@ -55,6 +55,7 @@ internal class Stage
 
     public static CoalescedFiles Coalesce(SoapGenArguments sa, ToolingContext toolContext)
     {
+        Console.WriteLine("Coalescing artifacts...");
         var coalescer = new SyntaxCoalescer();
 
         return coalescer.Coalesce(sa, toolContext);
@@ -62,21 +63,26 @@ internal class Stage
 
     public static void Overwrite(SoapGenArguments sa, CoalescedFiles files)
     {
+        Console.WriteLine("Overwrite files...");
         Write(sa, files.Interfaces);
         Write(sa, files.Client);
         Write(sa, files.Types);
+        Console.WriteLine($"  Deleting {sa.SvcutilFile()}");
         File.Delete(sa.SvcutilFile());
+        Console.WriteLine($"  Deleting {sa.XscgenFile()}");
         File.Delete(sa.XscgenFile());
     }
 
     static void Write(SoapGenArguments sa, NewFile file)
     {
-        File.WriteAllText(sa.Coalesced(file.Filename), file.Content);
+        var path = sa.Coalesced(file.Filename);
+        Console.WriteLine($"  Writing {path}");
+        File.WriteAllText(path, file.Content);
     }
 }
 
 public class ToolingContext
 {
-    public string XscGenArgs { get; set; }
-    public string SvcutilArgs { get; set; }
+    public string XscGenArgs { get; set; } = "";
+    public string SvcutilArgs { get; set; } = "";
 }

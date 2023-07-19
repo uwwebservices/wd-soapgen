@@ -170,7 +170,13 @@ class DependentExtractor
             return args;
         }
 
-        if (type is GenericNameSyntax g)
+        // TODO(cspital) try get the name
+        if (!type.TryGetName(out var name))
+        {
+            return args;
+        }
+
+        if (name is GenericNameSyntax g)
         {
             args.AddRange(g.TypeArgumentList.Arguments);
         }

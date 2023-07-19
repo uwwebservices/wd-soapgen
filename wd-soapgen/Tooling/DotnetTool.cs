@@ -41,7 +41,7 @@ namespace WD.SoapGen.Tooling
                         "-o",
                         args.Directory,
                         "-n",
-                        $"|{document}={args.Namespace}",
+                        $"urn:com.workday/bsvc={args.Namespace}",
                         "--order",
                         args.Xsd
                     },
@@ -72,11 +72,13 @@ namespace WD.SoapGen.Tooling
                     {
                         args.Wsdl,
                         "--outputDir",
-                        Path.Combine(args.Directory, "Service"),
+                        args.Directory,
+                        "--outputFile",
+                        args.SvcutilFile(),
                         "--serializer",
                         "XmlSerializer",
                         "--projectFile",
-                        Path.Combine(args.Directory, $"{args.Project}.csproj"),
+                        args.ProjectFile(),
                         "--namespace",
                         $"\"*,{args.Namespace}\"",
                         "--noLogo"
@@ -139,11 +141,19 @@ namespace WD.SoapGen.Tooling
             if (!proc.WaitForExit((int)timeout.TotalMilliseconds))
             {
                 proc.Kill();
-                Console.WriteLine(proc.StandardOutput.ReadToEnd());
+                var err = proc.StandardOutput.ReadToEnd().TrimEnd();
+                if (!string.IsNullOrWhiteSpace(err))
+                {
+                    Console.WriteLine(err);
+                }
                 throw new ToolingException($"{toolName} timed out after {(int)timeout.TotalSeconds} seconds");
             }
 
-            Console.WriteLine(proc.StandardOutput.ReadToEnd());
+            var output = proc.StandardOutput.ReadToEnd().TrimEnd();
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                Console.WriteLine(output);
+            }
 
             if (proc.ExitCode != 0)
             {

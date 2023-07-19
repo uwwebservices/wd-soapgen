@@ -35,11 +35,11 @@ namespace WD.SoapGen.Tooling
                 File.Delete(xscgenOutput);
             }
 
-            var serviceDirectory = args.ServiceDirectory();
-            if (Directory.Exists(serviceDirectory))
+            var serviceFile = args.SvcutilFile();
+            if (File.Exists(serviceFile))
             {
-                Console.WriteLine($"Deleting {serviceDirectory} ...");
-                Directory.Delete(serviceDirectory, recursive: true);
+                Console.WriteLine($"Deleting {serviceFile} ...");
+                File.Delete(serviceFile);
             }
 
             var interfaceFile = args.Coalesced(ContextRenderer.InterfaceFile);
@@ -76,15 +76,11 @@ namespace WD.SoapGen.Tooling
                 ret = false;
             }
 
-            var serviceDirectory = args.ServiceDirectory();
-            if (Directory.Exists(serviceDirectory))
+            var serviceFile = args.SvcutilFile();
+            if (File.Exists(serviceFile))
             {
-                var referenceFile = args.SvcutilFile();
-                if (File.Exists(referenceFile))
-                {
-                    fis.Add(referenceFile);
-                    ret = false;
-                }
+                fis.Add(serviceFile);
+                ret = false;
             }
 
             var interfaceFile = args.Coalesced(ContextRenderer.InterfaceFile);
