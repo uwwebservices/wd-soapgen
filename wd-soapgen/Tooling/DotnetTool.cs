@@ -27,10 +27,9 @@ namespace WD.SoapGen.Tooling
         /// <param name="namespace"></param>
         /// <param name="xsd"></param>
         /// <returns></returns>
-        public static void Xscgen(SoapGenArguments args)
+        public static string Xscgen(SoapGenArguments args)
         {
-            Console.WriteLine($"Generating types with xscgen from {args.Xsd} ...");
-            var document = Path.GetFileName(args.Xsd);
+            Console.WriteLine($"Generating types with xscgen...");
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -41,7 +40,7 @@ namespace WD.SoapGen.Tooling
                         "-o",
                         args.Directory,
                         "-n",
-                        $"|{document}={args.Namespace}",
+                        $"urn:com.workday/bsvc={args.Namespace}",
                         "--order",
                         args.Xsd
                     },
@@ -52,7 +51,7 @@ namespace WD.SoapGen.Tooling
                 },
             };
 
-            Run("xscgen", proc, TimeSpan.FromSeconds(60));
+            return Run("xscgen", proc, TimeSpan.FromSeconds(60));
         }
 
         /// <summary>
@@ -60,9 +59,9 @@ namespace WD.SoapGen.Tooling
         /// dotnet-svcutil Resource_Management.wsdl --outputDir Service --serializer XmlSerializer --projectFile UWD.Lib/UWD.Lib.csproj --namespace "*,UWD.Lib" 
         /// </summary>
         /// <param name="args"></param>
-        public static void Svcutil(SoapGenArguments args)
+        public static string Svcutil(SoapGenArguments args)
         {
-            Console.WriteLine($"Generating service client with dotnet-svcutil from {args.Wsdl} ...");
+            Console.WriteLine($"Generating client with dotnet-svcutil...");
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -72,11 +71,13 @@ namespace WD.SoapGen.Tooling
                     {
                         args.Wsdl,
                         "--outputDir",
-                        Path.Combine(args.Directory, "Service"),
+                        args.Directory,
+                        "--outputFile",
+                        args.SvcutilFile(),
                         "--serializer",
                         "XmlSerializer",
                         "--projectFile",
-                        Path.Combine(args.Directory, $"{args.Project}.csproj"),
+                        args.ProjectFile(),
                         "--namespace",
                         $"\"*,{args.Namespace}\"",
                         "--noLogo"
@@ -88,13 +89,13 @@ namespace WD.SoapGen.Tooling
                 }
             };
 
-            Run("dotnet-svcutil", proc, TimeSpan.FromSeconds(60));
+            return Run("dotnet-svcutil", proc, TimeSpan.FromSeconds(60));
         }
 
         public static void AddPackage(SoapGenArguments args, string package, string version = "")
         {
             var projectfile = args.ProjectFile();
-            Console.WriteLine($"Adding ServiceModel dependencies to {projectfile} ...");
+            Console.WriteLine($"Adding ServiceModel dependencies to {projectfile}...");
 
             var arglist = new Collection<string>
             {
@@ -131,22 +132,38 @@ namespace WD.SoapGen.Tooling
             Run("dotnet", proc, TimeSpan.FromSeconds(30));
         }
 
-        static void Run(string toolName, Process proc, TimeSpan timeout)
+        static string Run(string toolName, Process proc, TimeSpan timeout)
         {
+            var args = $"{toolName} {string.Join(" ", proc.StartInfo.ArgumentList)}";
             proc.Start();
 
             if (!proc.WaitForExit((int)timeout.TotalMilliseconds))
             {
                 proc.Kill();
-                Console.WriteLine(proc.StandardOutput.ReadToEnd());
+                WriteProcOutput(proc);
                 throw new ToolingException($"{toolName} timed out after {(int)timeout.TotalSeconds} seconds");
             }
 
-            Console.WriteLine(proc.StandardOutput.ReadToEnd());
+            WriteProcOutput(proc);
 
             if (proc.ExitCode != 0)
             {
                 throw new ToolingException(toolName, proc.ExitCode);
+            }
+
+            return args;
+        }
+
+        static void WriteProcOutput(Process proc)
+        {
+            var output = proc.StandardOutput.ReadToEnd().TrimEnd();
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                var lines = output.Split(Environment.NewLine);
+                foreach (var line in lines)
+                {
+                    Console.WriteLine($"  {line}");
+                }
             }
         }
 

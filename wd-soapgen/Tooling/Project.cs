@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics.CodeAnalysis;
 using WD.SoapGen.Ext;
+using WD.SoapGen.Code;
 
 namespace WD.SoapGen.Tooling
 {
@@ -27,18 +28,40 @@ namespace WD.SoapGen.Tooling
 
         public static void CleanUp(SoapGenArguments args)
         {
+            Console.WriteLine($"Cleaning up files in {args.Directory}...");
             var xscgenOutput = args.XscgenFile();
             if (File.Exists(xscgenOutput))
             {
-                Console.WriteLine($"Deleting {xscgenOutput} ...");
+                Console.WriteLine($"  Deleting {xscgenOutput}");
                 File.Delete(xscgenOutput);
             }
 
-            var serviceDirectory = args.ServiceDirectory();
-            if (Directory.Exists(serviceDirectory))
+            var serviceFile = args.SvcutilFile();
+            if (File.Exists(serviceFile))
             {
-                Console.WriteLine($"Deleting {serviceDirectory} ...");
-                Directory.Delete(serviceDirectory, recursive: true);
+                Console.WriteLine($"  Deleting {serviceFile}");
+                File.Delete(serviceFile);
+            }
+
+            var interfaceFile = args.Coalesced(ContextRenderer.InterfaceFile);
+            if (File.Exists(interfaceFile))
+            {
+                Console.WriteLine($"  Deleting {interfaceFile}");
+                File.Delete(interfaceFile);
+            }
+
+            var clientFile = args.Coalesced(ContextRenderer.ClientFile);
+            if (File.Exists(clientFile))
+            {
+                Console.WriteLine($"  Deleting {clientFile}");
+                File.Delete(clientFile);
+            }
+
+            var typesFile = args.Coalesced(ContextRenderer.TypesFile);
+            if (File.Exists(typesFile))
+            {
+                Console.WriteLine($"  Deleting {typesFile}");
+                File.Delete(typesFile);
             }
         }
 
@@ -54,15 +77,32 @@ namespace WD.SoapGen.Tooling
                 ret = false;
             }
 
-            var serviceDirectory = args.ServiceDirectory();
-            if (Directory.Exists(serviceDirectory))
+            var serviceFile = args.SvcutilFile();
+            if (File.Exists(serviceFile))
             {
-                var referenceFile = args.SvcutilFile();
-                if (File.Exists(referenceFile))
-                {
-                    fis.Add(referenceFile);
-                    ret = false;
-                }
+                fis.Add(serviceFile);
+                ret = false;
+            }
+
+            var interfaceFile = args.Coalesced(ContextRenderer.InterfaceFile);
+            if (File.Exists(interfaceFile))
+            {
+                fis.Add(interfaceFile);
+                ret = false;
+            }
+
+            var clientFile = args.Coalesced(ContextRenderer.ClientFile);
+            if (File.Exists(clientFile))
+            {
+                fis.Add(clientFile);
+                ret = false;
+            }
+
+            var typesFile = args.Coalesced(ContextRenderer.TypesFile);
+            if (File.Exists(typesFile))
+            {
+                fis.Add(typesFile);
+                ret = false;
             }
 
             files = fis;

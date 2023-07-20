@@ -24,7 +24,7 @@ Use links from:
   https://community.workday.com/sites/default/files/file-hosting/productionapi/versions/index.html"),
                 new Option<string>(new string[] { "--dir", "-d" }, () => Directory.GetCurrentDirectory(), "Target project directory. Must contain a csproj file."),
                 new Option<string>(new string[] { "--namespace", "-n" }, "Namespace to generate code for. Default project name."),
-                new Option<bool>(new string[] { "--clean", "-c" }, () => false, "Clean previously generated files."),
+                new Option<bool>(new string[] { "--clean", "-c" }, () => true, "Clean previously generated files."),
                 new Option<bool>(new string[] { "--no-install", "-x" }, () => false, "Do not install ServiceModel dependencies.")
             };
 
@@ -35,9 +35,12 @@ Use links from:
                     return 1;
                 }
 
+                Console.WriteLine($"Generating SOAP client {sa.Project} from {sa.ServiceWithVersion()}...");
+                Console.WriteLine($"  Wsdl: {sa.Wsdl}");
+                Console.WriteLine($"  Xsd: {sa.Xsd}");
+
                 if (clean)
                 {
-                    Console.WriteLine($"Cleaning up files in {sa.Directory} ...");
                     Project.CleanUp(sa);
                 }
 
@@ -53,24 +56,18 @@ Use links from:
 
                 try
                 {
-                    DotnetTool.Xscgen(sa);
-                    DotnetTool.Svcutil(sa);
+                    var tooling = Stage.Generate(sa);
 
-                    Console.WriteLine("Merging xscgen and dotnet-svcutil types:");
-                    Console.WriteLine($"  xscgen: {sa.XscgenFile()}");
-                    Console.WriteLine($"  dotnet-svcutil: {sa.SvcutilFile()}");
-
-                    var disagreements = new TypeDisagreementParser().Parse(sa.XscgenFile());
-
-                    var parser = new ClientParser(new ServiceRewriter(sa, disagreements));
-                    var service = parser.Extract(sa.SvcutilFile());
-
-                    File.WriteAllText(sa.SvcutilFile(), service.ToString());
+                    Stage.Correct(sa);
 
                     if (!noInstall)
                     {
-                        InstallDependencies(sa);
+                        Stage.InstallDependencies(sa);
                     }
+
+                    var files = Stage.Coalesce(sa, tooling);
+
+                    Stage.Overwrite(sa, files);
 
                     Console.WriteLine("Done.");
 
@@ -94,22 +91,6 @@ Use links from:
             return root.Invoke(args);
         }
 
-        static void InstallDependencies(SoapGenArguments sa)
-        {
-            Console.WriteLine("Installing ServiceModel dependencies...");
-            Console.WriteLine("  System.ServiceModel.Duplex...");
-            DotnetTool.AddPackage(sa, "System.ServiceModel.Duplex");
-
-            Console.WriteLine("  System.ServiceModel.Http...");
-            DotnetTool.AddPackage(sa, "System.ServiceModel.Http");
-
-            Console.WriteLine("  System.ServiceModel.NetTcp...");
-            DotnetTool.AddPackage(sa, "System.ServiceModel.NetTcp");
-
-            Console.WriteLine("  System.ServiceModel.Security...");
-            DotnetTool.AddPackage(sa, "System.ServiceModel.Security");
-        }
-
         static bool TryDigestArgs(string wsdl, string dir, string @namespace, [NotNullWhen(true)] out SoapGenArguments? args)
         {
             args = null;
@@ -130,7 +111,6 @@ Use links from:
 
             if (!wsdl.StartsWith("https://community.workday.com"))
             {
-                // NOTE(cspital) probably too restrictive
                 Console.Error.WriteLine("Only use this tool to generate clients from Workday's Community API site.");
                 Console.Error.WriteLine("  https://community.workday.com/sites/default/files/file-hosting/productionapi/versions/index.html");
                 return false;
@@ -187,17 +167,29 @@ Use links from:
 
         public string SvcutilFile()
         {
-            return Path.Combine(Directory, "Service", "Reference.cs");
+            return Path.Combine(Directory, "Svcutil.cs");
         }
 
-        public string ServiceDirectory()
+        public string SvcutilConfigFile()
         {
-            return Path.Combine(Directory, "Service");
+            return Path.Combine(Directory, "dotnet-svcutil.params.json");
         }
 
         public string ProjectFile()
         {
             return Path.Combine(Directory, $"{Project}.csproj");
+        }
+
+        public string Coalesced(string filename)
+        {
+            return Path.Combine(Directory, filename);
+        }
+
+        public string ServiceWithVersion()
+        {
+            var service = Path.GetFileNameWithoutExtension(Wsdl);
+            var version = Path.GetFileName(Path.GetDirectoryName(Wsdl));
+            return $"{service}@{version}";
         }
     }
 }
