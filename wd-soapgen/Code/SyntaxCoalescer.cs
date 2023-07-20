@@ -125,17 +125,15 @@ public class SyntaxCoalescer
     }
 }
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 public class CoalescedFiles
 {
-    public NewFile Interfaces { get; set; }
-    public NewFile Client { get; set; }
-    public NewFile Types { get; set; }
+    public NewFile Interfaces { get; set; } = new();
+    public NewFile Client { get; set; } = new();
+    public NewFile Types { get; set; } = new();
 }
 
 public class NewFile
 {
-    public string Filename { get; set; }
-    public string Content { get; set; }
+    public string Filename { get; set; } = "";
+    public string Content { get; set; } = "";
 }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
