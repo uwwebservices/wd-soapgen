@@ -29,7 +29,7 @@ namespace WD.SoapGen.Tooling
         /// <returns></returns>
         public static string Xscgen(SoapGenArguments args)
         {
-            Console.WriteLine($"Generating types with xscgen from {args.Xsd} ...");
+            Console.WriteLine($"Generating types with xscgen...");
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -61,7 +61,7 @@ namespace WD.SoapGen.Tooling
         /// <param name="args"></param>
         public static string Svcutil(SoapGenArguments args)
         {
-            Console.WriteLine($"Generating service client with dotnet-svcutil from {args.Wsdl} ...");
+            Console.WriteLine($"Generating client with dotnet-svcutil...");
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -95,7 +95,7 @@ namespace WD.SoapGen.Tooling
         public static void AddPackage(SoapGenArguments args, string package, string version = "")
         {
             var projectfile = args.ProjectFile();
-            Console.WriteLine($"Adding ServiceModel dependencies to {projectfile} ...");
+            Console.WriteLine($"Adding ServiceModel dependencies to {projectfile}...");
 
             var arglist = new Collection<string>
             {
@@ -140,19 +140,11 @@ namespace WD.SoapGen.Tooling
             if (!proc.WaitForExit((int)timeout.TotalMilliseconds))
             {
                 proc.Kill();
-                var err = proc.StandardOutput.ReadToEnd().TrimEnd();
-                if (!string.IsNullOrWhiteSpace(err))
-                {
-                    Console.WriteLine(err);
-                }
+                WriteProcOutput(proc);
                 throw new ToolingException($"{toolName} timed out after {(int)timeout.TotalSeconds} seconds");
             }
 
-            var output = proc.StandardOutput.ReadToEnd().TrimEnd();
-            if (!string.IsNullOrWhiteSpace(output))
-            {
-                Console.WriteLine(output);
-            }
+            WriteProcOutput(proc);
 
             if (proc.ExitCode != 0)
             {
@@ -160,6 +152,19 @@ namespace WD.SoapGen.Tooling
             }
 
             return args;
+        }
+
+        static void WriteProcOutput(Process proc)
+        {
+            var output = proc.StandardOutput.ReadToEnd().TrimEnd();
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                var lines = output.Split(Environment.NewLine);
+                foreach (var line in lines)
+                {
+                    Console.WriteLine($"  {line}");
+                }
+            }
         }
 
         static string ResolveBin(string toolName)

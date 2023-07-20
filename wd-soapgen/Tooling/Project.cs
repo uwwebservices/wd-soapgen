@@ -28,38 +28,39 @@ namespace WD.SoapGen.Tooling
 
         public static void CleanUp(SoapGenArguments args)
         {
+            Console.WriteLine($"Cleaning up files in {args.Directory}...");
             var xscgenOutput = args.XscgenFile();
             if (File.Exists(xscgenOutput))
             {
-                Console.WriteLine($"Deleting {xscgenOutput} ...");
+                Console.WriteLine($"  Deleting {xscgenOutput}");
                 File.Delete(xscgenOutput);
             }
 
             var serviceFile = args.SvcutilFile();
             if (File.Exists(serviceFile))
             {
-                Console.WriteLine($"Deleting {serviceFile} ...");
+                Console.WriteLine($"  Deleting {serviceFile}");
                 File.Delete(serviceFile);
             }
 
             var interfaceFile = args.Coalesced(ContextRenderer.InterfaceFile);
             if (File.Exists(interfaceFile))
             {
-                Console.WriteLine($"Deleting {interfaceFile} ...");
+                Console.WriteLine($"  Deleting {interfaceFile}");
                 File.Delete(interfaceFile);
             }
 
             var clientFile = args.Coalesced(ContextRenderer.ClientFile);
             if (File.Exists(clientFile))
             {
-                Console.WriteLine($"Deleting {clientFile} ...");
+                Console.WriteLine($"  Deleting {clientFile}");
                 File.Delete(clientFile);
             }
 
             var typesFile = args.Coalesced(ContextRenderer.TypesFile);
             if (File.Exists(typesFile))
             {
-                Console.WriteLine($"Deleting {typesFile} ...");
+                Console.WriteLine($"  Deleting {typesFile}");
                 File.Delete(typesFile);
             }
         }

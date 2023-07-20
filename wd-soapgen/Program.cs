@@ -35,9 +35,12 @@ Use links from:
                     return 1;
                 }
 
+                Console.WriteLine($"Generating SOAP client {sa.Project} from {sa.ServiceWithVersion()}...");
+                Console.WriteLine($"  Wsdl: {sa.Wsdl}");
+                Console.WriteLine($"  Xsd: {sa.Xsd}");
+
                 if (clean)
                 {
-                    Console.WriteLine($"Cleaning up files in {sa.Directory} ...");
                     Project.CleanUp(sa);
                 }
 
@@ -108,7 +111,6 @@ Use links from:
 
             if (!wsdl.StartsWith("https://community.workday.com"))
             {
-                // NOTE(cspital) probably too restrictive
                 Console.Error.WriteLine("Only use this tool to generate clients from Workday's Community API site.");
                 Console.Error.WriteLine("  https://community.workday.com/sites/default/files/file-hosting/productionapi/versions/index.html");
                 return false;
@@ -181,7 +183,13 @@ Use links from:
         public string Coalesced(string filename)
         {
             return Path.Combine(Directory, filename);
+        }
 
+        public string ServiceWithVersion()
+        {
+            var service = Path.GetFileNameWithoutExtension(Wsdl);
+            var version = Path.GetFileName(Path.GetDirectoryName(Wsdl));
+            return $"{service}@{version}";
         }
     }
 }
