@@ -30,7 +30,6 @@ namespace WD.SoapGen.Tooling
         public static string Xscgen(SoapGenArguments args)
         {
             Console.WriteLine($"Generating types with xscgen from {args.Xsd} ...");
-            var document = Path.GetFileName(args.Xsd);
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo

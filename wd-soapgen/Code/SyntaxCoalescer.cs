@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using WD.SoapGen.Ext;
 
@@ -19,7 +20,7 @@ namespace WD.SoapGen.Code;
 
 public class SyntaxCoalescer
 {
-    public CoalescedFiles Coalesce(SoapGenArguments args, ToolingContext toolingContext)
+    public static CoalescedFiles Coalesce(SoapGenArguments args, ToolingContext toolingContext)
     {
         var svcutilTree = CSharpSyntaxTree.ParseText(File.ReadAllText(args.SvcutilFile()));
         var svcutilRoot = svcutilTree.GetRoot();
@@ -56,10 +57,11 @@ public class SyntaxCoalescer
 
     class SvcutilParamsFile
     {
-        public string version { get; set; }
+        [JsonPropertyName("version")]
+        public string Version { get; set; } = "";
     }
 
-    Context GetContext(SyntaxNode svcutilRoot, SyntaxNode xscgenRoot, SvcutilParamsFile svcParams)
+    static Context GetContext(SyntaxNode svcutilRoot, SyntaxNode xscgenRoot, SvcutilParamsFile svcParams)
     {
         var ns = xscgenRoot
             .DescendantNodes()
@@ -113,7 +115,7 @@ public class SyntaxCoalescer
         return new Context
         {
             HeaderTrivia = triv,
-            SvcutilVersion = svcParams?.version,
+            SvcutilVersion = svcParams?.Version,
             Namespace = ns,
             Port = port,
             PortChannel = portChannel,
@@ -123,6 +125,7 @@ public class SyntaxCoalescer
     }
 }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 public class CoalescedFiles
 {
     public NewFile Interfaces { get; set; }
@@ -135,3 +138,4 @@ public class NewFile
     public string Filename { get; set; }
     public string Content { get; set; }
 }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

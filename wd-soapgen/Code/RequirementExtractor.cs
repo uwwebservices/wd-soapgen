@@ -67,7 +67,9 @@ class RequirementExtractor
             var name = attr.Name switch
             {
                 QualifiedNameSyntax q => q.Right.Identifier.Text,
-                SimpleNameSyntax s => s.Identifier.Text
+                SimpleNameSyntax s => s.Identifier.Text,
+                AliasQualifiedNameSyntax a => a.Name.Identifier.Text,
+                _ => attr.Name.ToString()
             };
 
             if (name != "FaultContractAttribute")
@@ -111,7 +113,7 @@ class RequirementExtractor
 
     IEnumerable<ClassDeclarationSyntax> Unwrap(TypeSyntax type)
     {
-        if (type is PredefinedTypeSyntax p)
+        if (type is PredefinedTypeSyntax)
         {
             yield break;
         }
@@ -156,7 +158,7 @@ class RequirementExtractor
         }
     }
 
-    IReadOnlyList<TypeSyntax> GetTypeArguments(TypeSyntax type)
+    static IReadOnlyList<TypeSyntax> GetTypeArguments(TypeSyntax type)
     {
         var args = new List<TypeSyntax>();
         if (type is PredefinedTypeSyntax)
@@ -170,7 +172,6 @@ class RequirementExtractor
             return args;
         }
 
-        // TODO(cspital) try get the name
         if (!type.TryGetName(out var name))
         {
             return args;

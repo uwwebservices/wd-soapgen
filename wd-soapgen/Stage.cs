@@ -56,9 +56,7 @@ internal class Stage
     public static CoalescedFiles Coalesce(SoapGenArguments sa, ToolingContext toolContext)
     {
         Console.WriteLine("Coalescing artifacts...");
-        var coalescer = new SyntaxCoalescer();
-
-        return coalescer.Coalesce(sa, toolContext);
+        return SyntaxCoalescer.Coalesce(sa, toolContext);
     }
 
     public static void Overwrite(SoapGenArguments sa, CoalescedFiles files)

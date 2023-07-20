@@ -39,6 +39,7 @@ public static class TypeExt
         return name is not null;
     }
 
+#pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
     public static IEnumerable<TypeSyntax> GetInstanceMembers(this ClassDeclarationSyntax cls)
     {
         var data = cls.Members
@@ -63,6 +64,7 @@ public static class TypeExt
             yield return ret;
         }
     }
+#pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
 
     public static bool IsPublicInstance(this MemberDeclarationSyntax m)
     {
