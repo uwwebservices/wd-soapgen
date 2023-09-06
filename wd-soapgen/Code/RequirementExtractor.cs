@@ -18,17 +18,13 @@ class RequirementExtractor
         _pluck = types;
     }
 
-    public IEnumerable<ClassDeclarationSyntax> GetRequirements(InterfaceDeclarationSyntax port, ClassDeclarationSyntax client)
+    public IEnumerable<ClassDeclarationSyntax> GetRequirements(InterfaceDeclarationSyntax port)
     {
-        var portMethods = port
+        var methods = port
             .DescendantNodes()
             .OfType<MethodDeclarationSyntax>();
 
-        var clientMethods = client
-            .DescendantNodes()
-            .OfType<MethodDeclarationSyntax>();
-
-        foreach (var method in portMethods.Concat(clientMethods))
+        foreach (var method in methods)
         {
             foreach (var arg in GetContractReturnTypes(method))
             {
