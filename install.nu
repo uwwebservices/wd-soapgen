@@ -12,13 +12,6 @@ def main [] {
         echo "dotnet-svcutil found..."
     }
 
-    if (not ($xscgen | path exists)) {
-        echo "dotnet-xscgen not found, installing..."
-        dotnet tool install -g dotnet-xscgen
-    } else {
-        echo "dotnet-xscgen found..."
-    }
-
     echo "Packing wd-soapgen..."
     dotnet pack -c Release
     if ($soapgen | path exists) {
