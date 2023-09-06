@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -31,7 +32,7 @@ public class SyntaxCoalescer
         var context = GetContext(svcutilRoot, xscgenRoot, svcParams);
 
         var extractor = new RequirementExtractor(context.Types);
-        var classes = extractor.GetRequirements(context.Port);
+        var classes = extractor.GetRequirements(context.Port, context.Client);
 
         var renderer = new ContextRenderer(context, toolingContext);
 
@@ -102,7 +103,7 @@ public class SyntaxCoalescer
 
         var b = ImmutableDictionary.CreateBuilder<string, ClassDeclarationSyntax>();
 
-        foreach ( var c in svcUtilClasses.Concat(xscGenClasses))
+        foreach (var c in svcUtilClasses.Concat(xscGenClasses))
         {
             if (!b.TryAdd(c.Identifier.Text, c))
             {

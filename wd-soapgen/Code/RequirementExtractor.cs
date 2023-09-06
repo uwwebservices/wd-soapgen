@@ -16,15 +16,20 @@ class RequirementExtractor
     public RequirementExtractor(IDictionary<string, ClassDeclarationSyntax> types)
     {
         _pluck = types;
+        var matches = _pluck.Keys.Where(x => x.StartsWith("Workday"));
     }
 
-    public IEnumerable<ClassDeclarationSyntax> GetRequirements(InterfaceDeclarationSyntax port)
+    public IEnumerable<ClassDeclarationSyntax> GetRequirements(InterfaceDeclarationSyntax port, ClassDeclarationSyntax client)
     {
-        var methods = port
+        var portMethods = port
             .DescendantNodes()
             .OfType<MethodDeclarationSyntax>();
 
-        foreach (var method in methods)
+        var clientMethods = client
+            .DescendantNodes()
+            .OfType<MethodDeclarationSyntax>();
+
+        foreach (var method in portMethods.Concat(clientMethods))
         {
             foreach (var arg in GetContractReturnTypes(method))
             {

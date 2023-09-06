@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WD.SoapGen.Code;
 using WD.SoapGen.Tooling;
+using XmlSchemaClassGenerator;
 
 namespace WD.SoapGen;
 
@@ -13,12 +14,23 @@ internal class Stage
 {
     public static ToolingContext Generate(SoapGenArguments sa)
     {
-        var xscArgs = DotnetTool.Xscgen(sa);
+        var xscgen = new Generator
+        {
+            OutputFolder = sa.Directory,
+            NamespaceProvider = new Dictionary<NamespaceKey, string>
+            {
+                { new NamespaceKey("urn:com.workday/bsvc"), sa.Namespace }
+            }.ToNamespaceProvider(new GeneratorConfiguration { NamespacePrefix = sa.Namespace }.NamespaceProvider.GenerateNamespace),
+            EmitOrder = true,
+            NamingProvider = new NamingProvider(NamingScheme.Direct)
+        };
+        xscgen.Generate(new[] { sa.Xsd });
+
         var svcArgs = DotnetTool.Svcutil(sa);
 
         return new ToolingContext
         {
-            XscGenArgs = xscArgs,
+            XscGenArgs = "",
             SvcutilArgs = svcArgs
         };
     }
