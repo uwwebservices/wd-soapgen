@@ -16,7 +16,6 @@ class RequirementExtractor
     public RequirementExtractor(IDictionary<string, ClassDeclarationSyntax> types)
     {
         _pluck = types;
-        var matches = _pluck.Keys.Where(x => x.StartsWith("Workday"));
     }
 
     public IEnumerable<ClassDeclarationSyntax> GetRequirements(InterfaceDeclarationSyntax port, ClassDeclarationSyntax client)
