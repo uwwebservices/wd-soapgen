@@ -1,12 +1,10 @@
 ﻿using System;
-using WD.SoapGen.Tooling;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using WD.SoapGen.Ext;
-using System.Diagnostics.CodeAnalysis;
-using WD.SoapGen.Code;
-using System.Reflection;
+using WD.SoapGen.Tooling;
 
 namespace WD.SoapGen
 {
@@ -19,9 +17,7 @@ namespace WD.SoapGen
     dotnet-svcutil: dotnet tool install --global dotnet-svcutil
     dotnet-xscgen: dotnet tool install --global dotnet-xscgen")
             {
-                new Argument<string>("wsdl", @"Link to the wsdl.
-Use links from:
-  https://community.workday.com/sites/default/files/file-hosting/productionapi/versions/index.html"),
+                new Argument<string>("wsdl", @"Link to the wsdl."),
                 new Option<string>(new string[] { "--dir", "-d" }, () => Directory.GetCurrentDirectory(), "Target project directory. Must contain a csproj file."),
                 new Option<string>(new string[] { "--namespace", "-n" }, "Namespace to generate code for. Default project name."),
                 new Option<bool>(new string[] { "--clean", "-c" }, () => true, "Clean previously generated files."),
@@ -109,20 +105,13 @@ Use links from:
                 return false;
             }
 
-            if (!wsdl.StartsWith("https://community.workday.com"))
+            if (!wsdl.EndsWith(".wsdl") && !wsdl.EndsWith("?wsdl"))
             {
-                Console.Error.WriteLine("Only use this tool to generate clients from Workday's Community API site.");
-                Console.Error.WriteLine("  https://community.workday.com/sites/default/files/file-hosting/productionapi/versions/index.html");
+                Console.Error.WriteLine($"wsdl must end in .wsdl or ?wsdl");
                 return false;
             }
 
-            if (!wsdl.EndsWith(".wsdl"))
-            {
-                Console.Error.WriteLine($"wsdl must end in .wsdl");
-                return false;
-            }
-
-            var xsd = Path.ChangeExtension(wsdl, ".xsd");
+            var xsd = string.Concat(wsdl.AsSpan(0, wsdl.LastIndexOf("wsdl")), "xsd");
 
             dir = Path.GetFullPath(dir);
 

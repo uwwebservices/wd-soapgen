@@ -58,6 +58,24 @@ cd WD.V35.FinancialManagement
 wd-soapgen --no-install https://community.workday.com/sites/default/files/file-hosting/productionapi/Financial_Management/v35.0/Financial_Management.wsdl
 ```
 
+## Formats
+This supports WSDL from either the Workday API or Workday RAAS.
+
+### Workday API Example
+
+https://community.workday.com/sites/default/files/file-hosting/productionapi/Financial_Management/v35.0/Financial_Management.wsdl
+
+The tool also uses the corresponding XSD endpoint:
+
+https://community.workday.com/sites/default/files/file-hosting/productionapi/Financial_Management/v35.0/Financial_Management.xsd
+
+### Workday RAAS Example
+
+https://wd5-services1.myworkday.com/ccx/service/customreport2/uw/ISU_FIN_EDP_Outbound/RPT_UWFTINT1062_FIN_Awards_FDM_Award_IDs?wsdl
+The tool also uses the corresponding XSD endpoint:
+
+https://wd5-services1.myworkday.com/ccx/service/customreport2/uw/ISU_FIN_EDP_Outbound/RPT_UWFTINT1062_FIN_Awards_FDM_Award_IDs?xsd
+
 ## Why?
 The WCF team has acknowledged a [bug](https://github.com/dotnet/wcf/issues/3812) in `dotnet-svcutil` that prevents `dotnet-svcutil` from reusing types in referenced assemblies. This is a problem because `dotnet-svcutil` has also acknowledged another [bug](https://github.com/dotnet/wcf/issues/2219) that produces incorrect types and annotations when collapsing SOME container types into jagged arrays. When these bugs are fixed, it MAY be trivial to generate classes with `xscgen` and then point `dotnet-svcutil` at those types or just use `dotnet-svcutil` directly. Until then, this application:
 - Creates files with both tools.
