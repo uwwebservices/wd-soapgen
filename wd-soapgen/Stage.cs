@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WD.SoapGen.Code;
 using WD.SoapGen.Tooling;
 using XmlSchemaClassGenerator;
@@ -19,7 +16,7 @@ internal class Stage
             OutputFolder = sa.Directory,
             NamespaceProvider = new Dictionary<NamespaceKey, string>
             {
-                { new NamespaceKey("urn:com.workday/bsvc"), sa.Namespace }
+                { new NamespaceKey(), sa.Namespace }
             }.ToNamespaceProvider(new GeneratorConfiguration { NamespacePrefix = sa.Namespace }.NamespaceProvider.GenerateNamespace),
             EmitOrder = true,
             NamingProvider = new NamingProvider(NamingScheme.Direct)
